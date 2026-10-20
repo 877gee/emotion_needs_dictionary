@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>감정/욕구 사전 :: emotion & needs dictionary</title>
+  <!-- Google Font: Tuffy -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tuffy:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            tuffy: ['Tuffy', 'sans-serif'],
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Strict Tuffy Font for English & Numerals with Lowercase */
+    .tuffy, [data-tuffy] {
+      font-family: 'Tuffy', sans-serif !important;
+      text-transform: lowercase !important;
+    }
+    .tuffy-num {
+      font-family: 'Tuffy', sans-serif !important;
+      font-feature-settings: "tnum";
+    }
+
+    /* Minimalist Achromatic Background */
+    body {
+      background-color: #f6f6f4;
+      color: #18181b;
+      min-height: 100vh;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+
+    /* Minimal scrollbars */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d4d4d8;
+    }
+
+    /* Pure Sharp Rectangular Block Chip (zero border-radius, pure solid category color) */
+    .word-block-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 0px !important; /* Zero roundness */
+      border: none !important;      /* Zero stroke */
+      font-size: 0.8125rem;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      letter-spacing: -0.01em;
+      transition: opacity 0.12s ease, transform 0.12s ease;
+    }
+    .word-block-chip:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    /* Compact word chip for gallery view (모아보기) - Optimized for 2 columns on mobile */
+    .word-block-chip-sm {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 6px;
+      border-radius: 0px !important;
+      border: none !important;
+      font-size: 0.6875rem; /* ~11px on mobile */
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      transition: opacity 0.12s ease, transform 0.12s ease;
+    }
+    @media (min-width: 640px) {
+      .word-block-chip-sm {
+        padding: 4px 8px;
+        font-size: 0.75rem; /* 12px on tablet/desktop */
+      }
+    }
+    .word-block-chip-sm:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    /* Sharp Flat Category Card (Zero roundness, Zero border, Pure White) */
+    .category-white-card {
+      background-color: #ffffff !important;
+      border-radius: 0px !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Category Title: No Background, +3px font size, 3px underbar */
+    .category-title-underbar {
+      background: transparent !important;
+      font-size: 1.0625rem; /* ~17px (+3px from previous 14px) */
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #18181b;
+      display: inline-block;
+      padding-bottom: 2px;
+      border-bottom-width: 3px;
+      border-bottom-style: solid;
+      border-radius: 0px;
+    }
+
+    /* Sticky Navigation Header in 펼쳐보기 */
+    .sticky-category-bar {
+      position: sticky;
+      top: 0;
+      z-index: 25;
+      background-color: rgba(246, 246, 244, 0.94);
+      backdrop-filter: blur(6px);
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(2px);
+    }
+  </style>
+</head>
+<body class="p-2.5 sm:p-5 md:p-6 flex flex-col min-h-screen max-w-7xl mx-auto w-full">
+
+  <!-- TOP HEADER (Compact Minimalist) -->
+  <header class="mb-4">
+    <!-- Top Title Row: Half Size -->
+    <div class="flex items-center justify-between pb-2 mb-3 border-b border-zinc-200">
+      <div class="flex items-baseline gap-2">
+        <h1 class="text-base sm:text-lg font-bold tracking-tight text-zinc-900">
+          감정/욕구 사전
+        </h1>
+        <span class="tuffy text-xs text-zinc-400 font-normal">emotion & needs dictionary</span>
+      </div>
+      
+      <!-- Layout View Switcher: [펼쳐보기] first (left), [모아보기] second (right) -->
+      <div class="flex items-center gap-1 text-xs">
+        <button id="viewSingleBtn" class="px-3 py-1 bg-zinc-900 text-white font-medium transition-all" style="border-radius: 0;">
+          펼쳐보기
+        </button>
+        <button id="viewGridBtn" class="px-3 py-1 bg-white text-zinc-600 hover:text-zinc-900 font-medium transition-all" style="border-radius: 0;">
+          모아보기
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Blocks + Search Bar in ONE clean responsive row -->
+    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
+      <!-- 4 Navigation Blocks (Sharp rectangles) -->
+      <div class="flex items-center flex-wrap gap-1.5">
+        <button id="navEmotionsBtn" class="px-3 py-1.5 text-xs font-bold bg-zinc-900 text-white flex items-center gap-1.5 transition-all" style="border-radius: 0;">
+          <span>감정사전</span>
+          <span class="tuffy tuffy-num text-[11px] opacity-80">226</span>
+        </button>
+        <button id="navNeedsBtn" class="px-3 py-1.5 text-xs font-medium bg-white text-zinc-700 hover:text-zinc-900 flex items-center gap-1.5 transition-all" style="border-radius: 0;">
+          <span>욕구사전</span>
+          <span class="tuffy tuffy-num text-[11px] text-zinc-400">119</span>
+        </button>
+        <button id="navAiBtn" class="px-3 py-1.5 text-xs font-medium bg-white text-zinc-700 hover:text-zinc-900 flex items-center gap-1.5 transition-all" style="border-radius: 0;">
+          <span class="tuffy font-bold text-zinc-900">ai</span>
+          <span>공감탐색기</span>
+        </button>
+        <button id="navBookmarkBtn" class="px-3 py-1.5 text-xs font-medium bg-white text-zinc-700 hover:text-zinc-900 flex items-center gap-1.5 transition-all" style="border-radius: 0;">
+          <span>보관함</span>
+          <span id="bookmarkCountBadge" class="tuffy tuffy-num text-[11px] text-zinc-400">0</span>
+        </button>
+      </div>
+
+      <!-- Search Input directly beside Nav Blocks -->
+      <div class="relative flex-1 max-w-md">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="단어 검색 (예: 답답하다, 인정, 서운함...)" 
+          class="w-full pl-8 pr-7 py-1.5 bg-white border-0 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 transition-all placeholder:text-zinc-400"
+          style="border-radius: 0;"
+        />
+        <svg class="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <button id="clearSearchBtn" class="hidden absolute right-2 top-2 text-zinc-400 hover:text-zinc-700 text-xs">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Search Filter Notice -->
+    <div id="searchNotice" class="hidden mt-2 px-3 py-1.5 bg-white flex items-center justify-between text-xs text-zinc-600" style="border-radius: 0;">
+      <div class="flex items-center gap-1.5">
+        <span>검색:</span>
+        <span id="searchKeywordText" class="font-bold text-zinc-900"></span>
+        <span id="searchResultCount" class="tuffy tuffy-num text-zinc-500"></span>
+      </div>
+      <button id="resetSearchFilterBtn" class="text-zinc-600 hover:text-zinc-900 underline text-[11px]">
+        전체 보기
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 mb-8">
+
+    <!-- VIEW 1: SINGLE/DETAILED VIEW (펼쳐보기 - DEFAULT VIEW) -->
+    <!-- 1. Sticky Category Top Bar (각 카테고리 고유색 배경 블럭, select category 문구 없음, 클릭 시 해당 카테고리로 바로 점프) -->
+    <!-- 2. 순서대로 기쁨,즐거움 밑에 자신감,능력 주루룩 나오는 전체 연속 리스트 -->
+    <section id="singleContainer" class="space-y-4">
+      <!-- Sticky Category Anchor Bar -->
+      <div class="sticky-category-bar py-2.5 mb-2 border-b border-zinc-200">
+        <div id="singleBlocksList" class="flex flex-wrap gap-1.5 sm:gap-2">
+          <!-- Rendered as sharp rectangular buttons with each category's unique color -->
+        </div>
+      </div>
+
+      <!-- Sequential Categories Feed -->
+      <div id="singleSequentialList" class="space-y-5 sm:space-y-6">
+        <!-- Rendered dynamically: 기쁨,즐거움 -> 자신감,능력 -> ... -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: GRID GALLERY MODE (모아보기 - 모바일에서도 최소 2칸! grid-cols-2 md:grid-cols-3) -->
+    <!-- 하단 joy & delight 및 펼쳐보기로 이동 버튼/라인 완전 제거! 깔끔한 순수 단어 카드 블럭 -->
+    <section id="gridContainer" class="hidden space-y-4">
+      <div id="foldersGrid" class="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-4 md:gap-5 items-start">
+        <!-- Rendered dynamically in 2 cols (mobile) & 3 cols (tablet/desktop) -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: AI EMPATHY FINDER (AI 공감 탐색기) -->
+    <section id="aiContainer" class="hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <!-- Left: Input & Quick Scenarios (5 cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="category-white-card p-5">
+            <h2 class="text-sm font-bold text-zinc-900 mb-1">상황이나 마음 적기</h2>
+            <p class="text-xs text-zinc-500 mb-3 leading-relaxed">
+              지금 겪은 일이나 드는 생각을 편하게 적어주세요. 가장 가까운 감정과 이면의 욕구를 분석해 드립니다.
+            </p>
+
+            <textarea 
+              id="aiStoryInput" 
+              rows="5" 
+              placeholder="예: 회의에서 열심히 준비한 기획안을 발표했는데 팀장님이 중간에 말을 끊었어요. 얼굴이 화끈거리고 가슴이 답답하고 서운해요..."
+              class="w-full p-3 bg-zinc-50 border-0 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 transition-all placeholder:text-zinc-400"
+              style="border-radius: 0;"
+            ></textarea>
+
+            <div class="mt-3 flex items-center justify-between">
+              <button id="aiClearInputBtn" class="text-xs text-zinc-400 hover:text-zinc-600">
+                지우기
+              </button>
+              <button id="aiAnalyzeBtn" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white font-medium text-xs transition-all flex items-center gap-1.5" style="border-radius: 0;">
+                <svg class="w-3.5 h-3.5 animate-spin hidden" id="aiSpinIcon" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                <span>분석하기</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Test Scenarios -->
+          <div class="category-white-card p-4">
+            <div class="tuffy text-[11px] font-bold text-zinc-400 mb-2">test scenarios :</div>
+            <div class="space-y-1.5">
+              <button class="scenario-btn w-full text-left p-2.5 bg-zinc-50 hover:bg-zinc-100 text-xs text-zinc-800 transition-all font-medium" style="border-radius: 0;" data-text="오늘 회의에서 열심히 준비한 기획안을 발표했는데 팀장님이 앞부분만 대충 보고 말을 끊어버렸어요. 얼굴이 화끈거리고 가슴이 꽉 막힌 것처럼 답답해요. 내가 무시당한 것 같아 너무 서운하고 화도 나요.">
+                “발표가 무시당해 얼굴이 화끈거리고 속상할 때”
+              </button>
+              <button class="scenario-btn w-full text-left p-2.5 bg-zinc-50 hover:bg-zinc-100 text-xs text-zinc-800 transition-all font-medium" style="border-radius: 0;" data-text="오랫동안 친하게 지내던 친구와 약속을 잡으려는데 계속 단답형으로 대답하고 바쁘다고만 해요. 내가 무슨 실수를 했나 불안하고 마음 한구석이 텅 빈 것처럼 쓸쓸해요.">
+                “친한 친구의 차가운 태도에 불안하고 쓸쓸할 때”
+              </button>
+              <button class="scenario-btn w-full text-left p-2.5 bg-zinc-50 hover:bg-zinc-100 text-xs text-zinc-800 transition-all font-medium" style="border-radius: 0;" data-text="내일 중요한 최종 면접이 있는데 심장이 계속 쿵쾅거리고 손에 땀이 나요. 잘할 수 있을지 두렵고 밤에 잠도 제대로 오지 않아서 초조해요.">
+                “중요한 시험이나 면접을 앞두고 안절부절못할 때”
+              </button>
+              <button class="scenario-btn w-full text-left p-2.5 bg-zinc-50 hover:bg-zinc-100 text-xs text-zinc-800 transition-all font-medium" style="border-radius: 0;" data-text="지난 몇 달 동안 고생해서 진행했던 프로젝트가 성공적으로 끝나고 동료들에게 큰 칭찬을 받았어요! 날아갈 듯이 기쁘고 내 노력이 빛을 발한 것 같아 정말 뿌듯하고 든든해요.">
+                “노력한 결과가 인정받아 날아갈 듯 기쁠 때”
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: AI Result Report (7 cols) -->
+        <div class="lg:col-span-7">
+          <div id="aiEmptyPlaceholder" class="category-white-card p-8 text-center">
+            <p class="text-xs text-zinc-400">
+              왼쪽 입력창에 상황을 적거나 테스트 예시를 누르면 감정과 욕구가 분석됩니다.
+            </p>
+          </div>
+
+          <div id="aiResultCard" class="hidden space-y-4">
+            <!-- Empathic Summary -->
+            <div class="category-white-card p-5">
+              <div class="flex items-center justify-between mb-2">
+                <span class="tuffy text-[11px] font-bold text-zinc-400">analysis summary</span>
+                <span class="tuffy text-[11px] text-zinc-400" id="aiAnalysisTimestamp">just now</span>
+              </div>
+              <p class="text-xs sm:text-sm text-zinc-700 leading-relaxed bg-zinc-50 p-3.5" id="aiEmpathySummary" style="border-radius: 0;">
+              </p>
+            </div>
+
+            <!-- Emotion & Need Chips -->
+            <div class="category-white-card p-5">
+              <div class="text-xs font-bold text-zinc-800 mb-2">핵심 감정 단어</div>
+              <div id="aiEmotionChips" class="flex flex-wrap gap-2 mb-4"></div>
+
+              <div class="text-xs font-bold text-zinc-800 mb-2">이면의 소중한 욕구</div>
+              <div id="aiNeedChips" class="flex flex-wrap gap-2"></div>
+            </div>
+
+            <!-- NVC Formula -->
+            <div class="bg-zinc-900 text-white p-4" style="border-radius: 0;">
+              <div class="tuffy text-[10px] text-zinc-400 mb-1">nvc communication guide</div>
+              <div class="text-xs text-zinc-200 leading-relaxed font-normal" id="aiNvcSentence">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: BOOKMARKS (보관함) -->
+    <section id="bookmarkContainer" class="hidden">
+      <div class="category-white-card p-5 sm:p-6">
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-zinc-100">
+          <h2 class="text-sm font-bold text-zinc-900">담아둔 단어 보관함</h2>
+          <button id="clearAllBookmarksBtn" class="text-xs text-zinc-400 hover:text-red-600 transition-colors">
+            전체 비우기
+          </button>
+        </div>
+
+        <div id="bookmarkList" class="flex flex-wrap gap-2"></div>
+
+        <div id="bookmarkEmptyState" class="hidden py-12 text-center text-xs text-zinc-400">
+          보관된 단어가 없습니다. 단어를 눌러 별표를 클릭해 저장해보세요.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- WORD DETAIL MODAL (사전적 의미, 뉘앙스, 연결 욕구, 개인 메모) -->
+  <div id="wordDetailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div id="modalBackdrop" class="modal-backdrop absolute inset-0"></div>
+
+    <div class="relative bg-white max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl z-10 p-5 sm:p-6" style="border-radius: 0;">
+      
+      <!-- Modal Top Bar -->
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-200">
+        <div class="flex items-center gap-2">
+          <!-- Category Title: No Background, 3px Underbar -->
+          <span id="modalCategoryBadge" class="category-title-underbar text-xs sm:text-sm"></span>
+          <span id="modalTypeBadge" class="tuffy text-[11px] text-zinc-400"></span>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button id="modalBookmarkToggleBtn" class="p-1 hover:bg-zinc-100 text-zinc-400 hover:text-amber-500 transition-colors" title="북마크 저장">
+            <svg id="modalBookmarkIcon" class="w-4 h-4 fill-none stroke-current" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+            </svg>
+          </button>
+          <button id="modalCloseBtn" class="p-1 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 transition-colors">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Word Header -->
+      <div class="mt-4 mb-5">
+        <h3 id="modalWordTitle" class="text-2xl font-bold text-zinc-900"></h3>
+        <p id="modalCategoryDesc" class="text-xs text-zinc-400 mt-1"></p>
+      </div>
+
+      <!-- Details -->
+      <div class="space-y-4 text-xs sm:text-sm">
+        <!-- 1. Definition -->
+        <div class="bg-zinc-50 p-3.5" style="border-radius: 0;">
+          <div class="font-bold text-zinc-900 mb-1">사전적 의미</div>
+          <p id="modalDefinitionText" class="text-zinc-700 leading-relaxed text-xs"></p>
+        </div>
+
+        <!-- 2. Nuance & Context -->
+        <div>
+          <div class="font-bold text-zinc-900 mb-1 text-xs">언제 느끼는가?</div>
+          <p id="modalContextText" class="text-zinc-600 leading-relaxed text-xs"></p>
+        </div>
+
+        <!-- 3. Connected Needs/Emotions -->
+        <div>
+          <div id="modalRelatedTitle" class="font-bold text-zinc-900 mb-1.5 text-xs">연결된 욕구</div>
+          <div id="modalRelatedTags" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- 4. Self Empathy Sentence -->
+        <div class="p-3.5 bg-zinc-900 text-white" style="border-radius: 0;">
+          <div class="tuffy text-[10px] text-zinc-400 mb-0.5">self-empathy phrase</div>
+          <p id="modalEmpathySentence" class="text-xs text-zinc-200 leading-relaxed"></p>
+        </div>
+
+        <!-- 5. Personal Note -->
+        <div class="pt-1">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="font-bold text-zinc-900 text-xs">나의 메모</span>
+            <span id="memoSavedIndicator" class="text-[10px] text-emerald-600 font-medium hidden">저장됨 ✓</span>
+          </div>
+          <textarea 
+            id="modalNoteInput" 
+            rows="2" 
+            placeholder="이 감정이나 욕구에 대한 내 경험 메모..." 
+            class="w-full p-2.5 bg-zinc-50 border-0 text-xs focus:outline-none focus:ring-1 focus:ring-zinc-900 transition-all placeholder:text-zinc-400"
+            style="border-radius: 0;"
+          ></textarea>
+          <div class="mt-1.5 flex justify-end">
+            <button id="modalSaveNoteBtn" class="px-3 py-1 bg-zinc-900 text-white text-xs hover:bg-zinc-800 transition-colors" style="border-radius: 0;">
+              저장
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-8 opacity-0 pointer-events-none transition-all duration-200 bg-zinc-900 text-white text-xs px-3.5 py-2 shadow-lg flex items-center gap-1.5" style="border-radius: 0;">
+    <span id="toastMessage"></span>
+  </div>
+
+  <!-- Minimal Footer -->
+  <footer class="mt-auto pt-4 text-center text-[11px] text-zinc-400 border-t border-zinc-200">
+    <span class="tuffy">emotion & needs dictionary • all numerals & alphabet in tuffy lowercase</span>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    const state = {
+      currentSection: 'emotions', // 'emotions' | 'needs' | 'ai' | 'bookmarks'
+      currentView: 'single', // 'single' (펼쳐보기 - DEFAULT) | 'grid' (모아보기)
+      searchKeyword: '',
+      bookmarks: JSON.parse(localStorage.getItem('user_bookmarks_v6') || '[]'),
+      userNotes: JSON.parse(localStorage.getItem('user_notes_v6') || '{}'),
+      selectedWordItem: null,
+      emotions: [{"id": "e_joy", "category": "기쁨, 즐거움", "enCategory": "joy & delight", "color": "#d7f071", "desc": "기대하던 일이 이루어지거나 마음에 흐뭇함과 생기가 넘칠 때 차오르는 밝고 긍정적인 감정", "relatedNeeds": ["성취", "즐거움", "휴식", "연결", "자기표현"], "words": ["가슴 벅차다", "가슴이 뭉클하다", "감격스럽다", "개운하다", "기분 좋다", "기쁘다", "날아갈 듯 하다", "뛸 듯하다", "마음이 가볍다", "마음이 확 열리다", "만족스럽다", "멋지다", "명랑하다", "몸 둘 바를 모르다", "반갑다", "뿌듯하다", "산뜻하다", "살 맛 난다", "삼빡하다", "상쾌하다", "상큼하다", "생기 있다", "시원하다", "신나다", "안심되다", "유쾌하다", "자유롭다", "좋다", "즐겁다", "짜릿하다", "쾌활하다", "편안하다", "평화롭다", "행복하다", "활기차다", "황홀하다", "흐뭇하다", "흡족하다", "흥겹다"]}, {"id": "e_confidence", "category": "자신감, 능력", "enCategory": "confidence & power", "color": "#1a9dc9", "desc": "자신의 역량과 가치에 대한 확신이 차오르고 스스로를 든든하게 신뢰할 때 샘솟는 힘", "relatedNeeds": ["효능감", "도전", "성장", "숙달", "자기신뢰"], "words": ["우습다", "당당하다", "든든하다", "뿌듯하다", "신나다", "씩씩하다", "안전하다", "의기양양하다", "자랑스럽다", "자신감을 느끼다", "자신 있다", "자유스럽다", "존경스럽다", "확신감이 들다", "활발하다", "희망차다"]}, {"id": "e_love", "category": "사랑, 관심, 부러움", "enCategory": "love & affection", "color": "#fec8d8", "desc": "누군가 또는 무언가에 마음이 끌리고 깊은 온기와 친밀함, 고마움을 느끼는 다정한 마음", "relatedNeeds": ["친밀한 관계", "유대", "배려", "소속감", "애착 형성"], "words": ["가까움(친밀감)을 느끼다", "감미롭다", "감사함을 느끼다", "고맙다", "관대하다", "다정하다", "따뜻함을 느끼다", "마음이 넓다", "멋있다", "반했다", "보기 좋다", "사랑스럽다", "사랑을 느끼다", "상냥하다", "선하다", "소박하다", "순수하다", "아름답다", "애정이 깊다", "애착이 가다", "열망, 애정을 느끼다", "예쁘다", "온화하다", "부럽다"]}, {"id": "e_anger", "category": "성남, 분노, 화", "enCategory": "anger & frustration", "color": "#ff6c50", "desc": "자신의 존엄, 경계, 규칙 또는 소중한 가치가 부당하게 침해받았다고 느낄 때 일어나는 뜨거운 저항", "relatedNeeds": ["존중", "공정함/평등", "자기보호", "이해", "경계"], "words": ["분통이 터지다", "성질이 나다", "속상하다", "속이 부글부글 끓다", "숨 막히다", "신경질 난다", "억울하다", "열 받는다", "울화 통이 터지다", "원망스럽다", "유감스럽다", "적개심을 느끼다", "죽겠다", "핏대가 서다", "한이 맺히다", "화나다", "환멸을 느끼다"]}, {"id": "e_sadness", "category": "슬픔, 괴로움", "enCategory": "sadness & grief", "color": "#6896c7", "desc": "소중한 무언가를 잃어버렸거나 기대했던 바람이 무너졌을 때 마음이 먹먹해지고 저려오는 슬픔", "relatedNeeds": ["위안", "애도", "공감", "돌봄을 받음", "회복"], "words": ["가슴이 아프다", "가슴이 저리다", "가슴이 찢어진다", "가엽다", "공허하다", "괴롭다", "마음이 상하다", "막막하다", "먹먹하다", "(가슴이) 미어지다", "불쌍하다", "비참하다", "서럽다", "소외감을 느끼다", "속이 썩는 것 같다", "쓰리다", "아련하다", "아리다", "우울하다", "울적하다", "절망스럽다", "좌절감을 느끼다", "착잡하다", "처량하다", "처참하다", "측은하다", "침통하다", "캄캄하다", "한스럽다", "후회스럽다"]}, {"id": "e_fear", "category": "두려움, 걱정, 불안", "enCategory": "fear & anxiety", "color": "#f3a80e", "desc": "앞일을 알 수 없거나 위협과 불안정한 요소에 노출되어 가슴이 두근거리고 조바심이 나는 긴장", "relatedNeeds": ["안전", "예측가능성", "안정성", "신뢰", "보호받음"], "words": ["가슴이 답답하다", "걱정스럽다", "겁이 나다", "겁에 질리다", "긴장하다", "놀라다", "당황하다", "두렵다", "떨리다", "무섭다", "무시무시하다", "불안하다", "섬뜩하다", "소름 끼치다", "아슬아슬하다", "아찔하다", "안절부절못하다", "안쓰럽다", "안타깝다", "압박감이 들다", "애간장이 탄다", "애처롭다", "염려스럽다", "조바심이 나다", "주눅이 들다", "질리다", "찜찜하다", "초조하다"]}, {"id": "e_loneliness", "category": "외로움", "enCategory": "loneliness & solitude", "color": "#843d83", "desc": "마음을 터놓을 온기나 정서적 교감이 부재하여 가슴 한편이 텅 빈 듯 시리고 쓸쓸한 상태", "relatedNeeds": ["연결", "소속감", "공동체", "이해", "친밀한 관계"], "words": ["그립다", "쓸쓸하다", "외롭다", "허전하다"]}, {"id": "e_doubt", "category": "의심", "enCategory": "doubt & confusion", "color": "#5f9c94", "desc": "상황이나 타인의 의도가 투명하지 않아 확신을 갖지 못하고 미심쩍거나 혼란스러워하는 마음", "relatedNeeds": ["명료함", "진실", "정직", "확신", "예측가능성"], "words": ["걱정스럽다", "기분이 묘하다", "꼬였다", "답답하다", "뒤가 캥기다", "막막하다", "뭐가 뭔지 모르다", "부담스럽다", "불안하다", "생소하다", "아득하다", "아리송하다", "의아하다", "이상하다", "조심스럽다", "캄캄하다", "혼란스럽다", "후회스럽다"]}, {"id": "e_hatred", "category": "미움, 증오", "enCategory": "resentment & aversion", "color": "#af303b", "desc": "특정 대상이나 상황에 대해 강한 거부감, 불쾌함, 또는 반감이 들어 거리를 두고 싶은 감정", "relatedNeeds": ["정서적 안전", "자기보호", "존중", "공간", "조화"], "words": ["거부감이 들다", "경멸감을 느끼다", "골치 아프다", "괴롭다", "괘씸하다", "구역질이 난다", "귀찮다", "떫다", "미칠 것 같다", "밉다", "반감이 들다", "배반감을 느끼다", "배 아프다", "불만이다", "불쾌하다", "서운하다", "섭섭하다", "성에 안 찬다", "싫다", "심술 나다", "쌀쌀하다", "아프다", "안 좋다", "약 오르다", "역겹다", "저주스럽다", "지겹다", "짜증나다", "토할 것 같다", "혐오감을 느끼다"]}, {"id": "e_surprise", "category": "놀라움", "enCategory": "surprise & shock", "color": "#c9ffcd", "desc": "예기치 못한 상황이나 자극을 맞닥뜨려 신경이 곤두서고 마음이 크게 흔들리거나 얼얼해진 상태", "relatedNeeds": ["자각", "안정성", "명료함", "이해", "질서"], "words": ["감격스럽다", "곤혹스럽다", "골치 아프다", "기가 막히다", "기가 죽다", "긴장을 느끼다", "끔찍하다", "놀랍다", "당혹스럽다", "당황스럽다", "대단하다", "먹먹하다", "머리카락이 곤두서다", "멍해지다", "아찔하다", "어지럽다", "정신이 번쩍 들다", "화끈거리다", "흥분되다", "피가 끓어 오르다"]}],
+      needs: [{"id": "n_autonomy", "category": "자율성", "enCategory": "autonomy & freedom", "color": "#1a9dc9", "desc": "자신의 꿈, 목표, 가치를 선택할 수 있는 자유, 가치를 이루기 위한 방법을 선택할 자유", "relatedEmotions": ["자유롭다", "당당하다", "의기양양하다", "답답하다", "속상하다"], "words": ["자신의 꿈", "목표 선택", "가치 선택의 자유", "방법을 선택할 자유", "자발성", "독립성", "주도권", "자기결정"]}, {"id": "n_physical", "category": "신체적/생존", "enCategory": "physical & survival", "color": "#d7f071", "desc": "생명을 보존하고 육체적 피로를 풀며 편안하고 온전한 상태를 유지하고자 하는 본능적 욕구", "relatedEmotions": ["편안하다", "개운하다", "생기 있다", "숨 막히다", "골치 아프다"], "words": ["공기", "음식", "물", "주거", "휴식", "수면", "안전", "신체적 접촉(스킨십)", "성적 표현", "따뜻함", "부드러움", "편안함", "돌봄을 받음", "보호받음", "애착 형성", "자유로운 움직임", "운동"]}, {"id": "n_social", "category": "사회적/정서적/상호의존", "enCategory": "social & interdependence", "color": "#fec8d8", "desc": "타인과 깊이 소통하고 서로 신뢰하며 존중과 온정을 나누고 의지하고자 하는 관계적 욕구", "relatedEmotions": ["든든하다", "고맙다", "가까움을 느끼다", "서운하다", "외롭다"], "words": ["주는 것", "봉사", "친밀한 관계", "유대", "소통", "연결", "배려", "존중", "상호성", "공감", "이해", "수용", "지지", "협력", "도움", "감사", "인정", "승인", "사랑", "애정", "관심", "호감", "우정", "가까움", "나눔", "소속감", "공동체", "안도", "위안", "신뢰", "확신", "예측가능성", "정서적 안전", "자기보호", "일관성", "안정성"]}, {"id": "n_play", "category": "놀이/재미", "enCategory": "play & fun", "color": "#f3a80e", "desc": "목적이나 의무감에서 벗어나 자발적인 즐거움과 유쾌한 웃음, 생기를 만끽하고자 하는 욕구", "relatedEmotions": ["신나다", "유쾌하다", "흥겹다", "지겹다", "답답하다"], "words": ["즐거움", "재미", "유머", "흥", "호기심", "자발적 몰입", "유쾌한 웃음"]}, {"id": "n_meaning", "category": "삶의 의미", "enCategory": "meaning of life", "color": "#843d83", "desc": "내 삶이 누군가에게 기여하고 보람을 느끼며, 고유한 존재 이유와 가치를 발견하고자 하는 욕구", "relatedEmotions": ["보람차다", "뿌듯하다", "희망차다", "공허하다", "막막하다"], "words": ["기여", "능력", "도전", "명료함", "발견", "보람", "의미", "인생예찬(축하, 애도)", "기념하기", "깨달음", "자극", "주관을 가짐(자신만의 견해나 사상)", "중요하게 여겨짐", "참여", "회복", "효능감", "희망", "열정"]}, {"id": "n_integrity", "category": "진실성", "enCategory": "authenticity & integrity", "color": "#6c9672", "desc": "거짓이나 왜곡 없이 정직하고 투명하게 자신을 표현하고 내면의 도덕적 일치를 지키려는 욕구", "relatedEmotions": ["당당하다", "개운하다", "떳떳하다", "찜찜하다", "괴롭다"], "words": ["정직", "진실", "성실성", "존재감", "일치", "개성", "자기존중", "비전", "꿈"]}, {"id": "n_peace", "category": "아름다움/평화", "enCategory": "beauty & peace", "color": "#bcd5fd", "desc": "감각적 조화와 마음의 고요함을 누리고, 갈등 없는 평탄함과 영적 여유를 만끽하고자 하는 욕구", "relatedEmotions": ["평화롭다", "홀가분하다", "아름답다", "불안하다", "답답하다"], "words": ["아름다움", "평탄함", "홀가분함", "여유", "평등", "조화", "질서", "평화", "영적 교감", "영성"]}, {"id": "n_actualization", "category": "자기구현", "enCategory": "self-actualization", "color": "#ff6c50", "desc": "새로운 배움과 창조를 통해 스스로를 성장시키고 잠재력을 한계 없이 꽃피우고자 하는 욕구", "relatedEmotions": ["자신감을 느끼다", "짜릿하다", "활기차다", "좌절감을 느끼다", "정체되다"], "words": ["성취", "배움", "생산", "성장", "창조성", "치유", "숙달", "전문성", "목표", "가르침", "자각", "자기표현", "자신감", "자기 신뢰"]}]
+    };
+
+    // Text Contrast Helper for Category Unique Colors
+    function getTextColor(hex) {
+      const c = hex.replace('#', '');
+      const r = parseInt(c.substr(0, 2), 16);
+      const g = parseInt(c.substr(2, 2), 16);
+      const b = parseInt(c.substr(4, 2), 16);
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      return lum > 140 ? '#18181b' : '#ffffff';
+    }
+
+    // DOM References
+    const navEmotionsBtn = document.getElementById('navEmotionsBtn');
+    const navNeedsBtn = document.getElementById('navNeedsBtn');
+    const navAiBtn = document.getElementById('navAiBtn');
+    const navBookmarkBtn = document.getElementById('navBookmarkBtn');
+    const bookmarkCountBadge = document.getElementById('bookmarkCountBadge');
+
+    const viewSingleBtn = document.getElementById('viewSingleBtn');
+    const viewGridBtn = document.getElementById('viewGridBtn');
+    const singleContainer = document.getElementById('singleContainer');
+    const gridContainer = document.getElementById('gridContainer');
+    const aiContainer = document.getElementById('aiContainer');
+    const bookmarkContainer = document.getElementById('bookmarkContainer');
+
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const searchNotice = document.getElementById('searchNotice');
+    const searchKeywordText = document.getElementById('searchKeywordText');
+    const searchResultCount = document.getElementById('searchResultCount');
+    const resetSearchFilterBtn = document.getElementById('resetSearchFilterBtn');
+
+    const singleBlocksList = document.getElementById('singleBlocksList');
+    const singleSequentialList = document.getElementById('singleSequentialList');
+    const foldersGrid = document.getElementById('foldersGrid');
+    const bookmarkList = document.getElementById('bookmarkList');
+    const bookmarkEmptyState = document.getElementById('bookmarkEmptyState');
+    const clearAllBookmarksBtn = document.getElementById('clearAllBookmarksBtn');
+
+    // AI DOM References
+    const aiStoryInput = document.getElementById('aiStoryInput');
+    const aiClearInputBtn = document.getElementById('aiClearInputBtn');
+    const aiAnalyzeBtn = document.getElementById('aiAnalyzeBtn');
+    const aiSpinIcon = document.getElementById('aiSpinIcon');
+    const aiEmptyPlaceholder = document.getElementById('aiEmptyPlaceholder');
+    const aiResultCard = document.getElementById('aiResultCard');
+    const aiEmpathySummary = document.getElementById('aiEmpathySummary');
+    const aiEmotionChips = document.getElementById('aiEmotionChips');
+    const aiNeedChips = document.getElementById('aiNeedChips');
+    const aiNvcSentence = document.getElementById('aiNvcSentence');
+    const aiAnalysisTimestamp = document.getElementById('aiAnalysisTimestamp');
+
+    // Modal DOM References
+    const wordDetailModal = document.getElementById('wordDetailModal');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalBookmarkToggleBtn = document.getElementById('modalBookmarkToggleBtn');
+    const modalBookmarkIcon = document.getElementById('modalBookmarkIcon');
+    const modalCategoryBadge = document.getElementById('modalCategoryBadge');
+    const modalTypeBadge = document.getElementById('modalTypeBadge');
+    const modalWordTitle = document.getElementById('modalWordTitle');
+    const modalCategoryDesc = document.getElementById('modalCategoryDesc');
+    const modalDefinitionText = document.getElementById('modalDefinitionText');
+    const modalContextText = document.getElementById('modalContextText');
+    const modalRelatedTitle = document.getElementById('modalRelatedTitle');
+    const modalRelatedTags = document.getElementById('modalRelatedTags');
+    const modalEmpathySentence = document.getElementById('modalEmpathySentence');
+    const modalNoteInput = document.getElementById('modalNoteInput');
+    const modalSaveNoteBtn = document.getElementById('modalSaveNoteBtn');
+    const memoSavedIndicator = document.getElementById('memoSavedIndicator');
+
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+
+    function showToast(msg) {
+      toastMessage.textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-8');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-8');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2000);
+    }
+
+    function updateBookmarkBadge() {
+      bookmarkCountBadge.textContent = state.bookmarks.length;
+    }
+
+    function getWordDetails(word, catObj, type) {
+      const isEmotion = type === 'emotion';
+      return {
+        word: word,
+        type: type,
+        category: catObj.category,
+        enCategory: catObj.enCategory,
+        color: catObj.color,
+        catDesc: catObj.desc,
+        definition: isEmotion 
+          ? `‘${word}’는 ${catObj.category} 영역에 속하는 감정으로, ${catObj.desc}의 내면 상태를 가리킵니다.`
+          : `‘${word}’는 삶을 온전하게 가꾸기 위해 필요한 ${catObj.category} 영역의 본원적 욕구입니다.`,
+        context: isEmotion
+          ? `내적 기대나 관계의 상호작용 속에서 가슴과 호흡, 신경계의 울림과 함께 즉각적으로 반응하는 마음의 신호입니다.`
+          : `이 욕구가 채워지면 평온과 활력이 깃들며, 충족되지 못할 때 마음은 불안이나 서운함 등의 감정으로 신호를 보냅니다.`,
+        related: isEmotion ? (catObj.relatedNeeds || []) : (catObj.relatedEmotions || []),
+        empathy: isEmotion
+          ? `“지금 내 안에 ‘${word}’ 마음이 일어났구나. 내가 무엇을 바라고 있는지 귀 기울여 볼게.”`
+          : `“나에게 지금 ‘${word}’(이)가 참 소중하구나. 이 바람을 있는 그대로 존중해줄게.”`
+      };
+    }
+
+    // 1. RENDER: 펼쳐보기 (DEFAULT VIEW)
+    function renderSingleView() {
+      const list = state.currentSection === 'emotions' ? state.emotions : state.needs;
+      const type = state.currentSection === 'emotions' ? 'emotion' : 'need';
+      const kw = state.searchKeyword.toLowerCase().trim();
+
+      // Top sticky category anchor buttons
+      singleBlocksList.innerHTML = '';
+      list.forEach((cat, idx) => {
+        const textColor = getTextColor(cat.color);
+        const btn = document.createElement('button');
+        btn.className = 'px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs font-bold transition-all';
+        btn.style.borderRadius = '0px';
+        btn.style.backgroundColor = cat.color;
+        btn.style.color = textColor;
+        btn.textContent = cat.category;
+
+        btn.addEventListener('click', () => {
+          const targetEl = document.getElementById(`cat-feed-${cat.id}`);
+          if (targetEl) {
+            const yOffset = -65; // Offset for sticky bar
+            const y = targetEl.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        });
+
+        singleBlocksList.appendChild(btn);
+      });
+
+      // Sequential categories feed
+      singleSequentialList.innerHTML = '';
+      let totalMatches = 0;
+
+      list.forEach((cat, catIdx) => {
+        const filteredWords = kw 
+          ? cat.words.filter(w => w.toLowerCase().includes(kw) || cat.category.toLowerCase().includes(kw))
+          : cat.words;
+
+        if (kw && filteredWords.length === 0) return;
+        totalMatches += filteredWords.length;
+
+        const textColor = getTextColor(cat.color);
+        const sectionCard = document.createElement('div');
+        sectionCard.id = `cat-feed-${cat.id}`;
+        sectionCard.className = 'category-white-card p-4 sm:p-6 md:p-7';
+
+        sectionCard.innerHTML = `
+          <!-- Title: No Background, +3px font size, 3px underbar in category color -->
+          <div class="flex items-center justify-between mb-3.5 sm:mb-4">
+            <div>
+              <h2 class="category-title-underbar" style="border-bottom-color: ${cat.color};">
+                ${cat.category}
+              </h2>
+            </div>
+            <span class="tuffy text-xs text-zinc-400 font-bold">${filteredWords.length} words</span>
+          </div>
+
+          <!-- All Word Blocks Grid: Sharp ticket blocks filled with category color -->
+          <div class="flex flex-wrap gap-1.5 sm:gap-2 pt-1 mb-4 sm:mb-5">
+            ${filteredWords.map(w => `
+              <button class="word-block-chip" data-word="${w}" data-cat-idx="${catIdx}" data-type="${type}" style="background-color: ${cat.color}; color: ${textColor};">
+                ${w}
+              </button>
+            `).join('')}
+          </div>
+
+          <!-- Connected Items Footer -->
+          <div class="pt-3 border-t border-zinc-100 flex items-center flex-wrap gap-1.5 sm:gap-2 text-xs">
+            <span class="text-zinc-500 font-semibold text-[11px] sm:text-xs">${type === 'emotion' ? '연결된 욕구:' : '연결된 감정:'}</span>
+            ${(type === 'emotion' ? cat.relatedNeeds : cat.relatedEmotions || []).map(r => `
+              <span class="px-2 py-0.5 bg-zinc-100 text-zinc-700 text-[11px] sm:text-xs font-medium" style="border-radius: 0;"># ${r}</span>
+            `).join('')}
+          </div>
+        `;
+
+        singleSequentialList.appendChild(sectionCard);
+      });
+
+      if (kw) {
+        searchNotice.classList.remove('hidden');
+        searchKeywordText.textContent = `"${kw}"`;
+        searchResultCount.textContent = `(${totalMatches}개 발견)`;
+      } else {
+        searchNotice.classList.add('hidden');
+      }
+
+      if (totalMatches === 0 && kw) {
+        singleSequentialList.innerHTML = `
+          <div class="py-12 text-center category-white-card text-xs text-zinc-400">
+            일치하는 단어가 없습니다.
+          </div>
+        `;
+      }
+    }
+
+    // 2. RENDER: 모아보기 (Grid Gallery View - 2 columns on mobile, 3 columns on tablet/desktop)
+    // - 모바일에서도 최소 2칸 (grid-cols-2 md:grid-cols-3)
+    // - 하단 영문명 (joy & delight) 및 펼쳐보기 이동 버튼/라인 완전 제거!
+    // - 카드 타이틀 클릭 시 해당 카테고리로 펼쳐보기 이동
+    function renderGridView() {
+      foldersGrid.innerHTML = '';
+      const list = state.currentSection === 'emotions' ? state.emotions : state.needs;
+      const type = state.currentSection === 'emotions' ? 'emotion' : 'need';
+      const kw = state.searchKeyword.toLowerCase().trim();
+
+      let totalMatches = 0;
+
+      list.forEach((cat, catIdx) => {
+        const filteredWords = kw 
+          ? cat.words.filter(w => w.toLowerCase().includes(kw) || cat.category.toLowerCase().includes(kw))
+          : cat.words;
+
+        if (kw && filteredWords.length === 0) return;
+        totalMatches += filteredWords.length;
+
+        const textColor = getTextColor(cat.color);
+
+        const card = document.createElement('div');
+        // Pure White Sharp Rectangle Card: Compact padding for 2-column mobile layout
+        card.className = 'category-white-card p-3 sm:p-4 md:p-5 flex flex-col justify-start';
+        
+        // No footer, no joy & delight, no divider line. Just clean category title & compact word chips!
+        card.innerHTML = `
+          <!-- Title: No Background, 3px underbar, clickable to jump to 펼쳐보기 -->
+          <div class="flex items-center justify-between mb-2.5 sm:mb-3">
+            <h3 class="category-title-underbar text-xs sm:text-sm md:text-base cursor-pointer hover:opacity-80 transition-opacity view-feed-jump-btn" data-cat-id="${cat.id}" style="border-bottom-color: ${cat.color};" title="펼쳐보기로 이동">
+              ${cat.category}
+            </h3>
+            <span class="tuffy text-[10px] sm:text-xs text-zinc-400 font-bold">${filteredWords.length}</span>
+          </div>
+
+          <!-- Compact Words Gallery: Small ticket blocks perfectly fitting 2-column mobile layout -->
+          <div class="flex flex-wrap gap-1 sm:gap-1.5 pt-0.5">
+            ${filteredWords.map(w => `
+              <button class="word-block-chip-sm" data-word="${w}" data-cat-idx="${catIdx}" data-type="${type}" style="background-color: ${cat.color}; color: ${textColor};">
+                ${w}
+              </button>
+            `).join('')}
+          </div>
+        `;
+
+        foldersGrid.appendChild(card);
+      });
+
+      if (kw) {
+        searchNotice.classList.remove('hidden');
+        searchKeywordText.textContent = `"${kw}"`;
+        searchResultCount.textContent = `(${totalMatches}개 발견)`;
+      } else {
+        searchNotice.classList.add('hidden');
+      }
+
+      if (totalMatches === 0 && kw) {
+        foldersGrid.innerHTML = `
+          <div class="col-span-full py-12 text-center category-white-card text-xs text-zinc-400">
+            일치하는 단어가 없습니다.
+          </div>
+        `;
+      }
+    }
+
+    // RENDER: Bookmarks
+    function renderBookmarksView() {
+      bookmarkList.innerHTML = '';
+      if (state.bookmarks.length === 0) {
+        bookmarkEmptyState.classList.remove('hidden');
+        return;
+      }
+      bookmarkEmptyState.classList.add('hidden');
+
+      state.bookmarks.forEach((bm) => {
+        const btn = document.createElement('button');
+        const textColor = getTextColor(bm.color);
+        btn.className = 'word-block-chip';
+        btn.style.backgroundColor = bm.color;
+        btn.style.color = textColor;
+        btn.innerHTML = `
+          <span>${bm.word}</span>
+          <span class="tuffy text-[11px] ml-1.5 opacity-75">(${bm.category})</span>
+        `;
+        btn.addEventListener('click', () => {
+          openWordModal(bm.word, bm.category, bm.type);
+        });
+        bookmarkList.appendChild(btn);
+      });
+    }
+
+    // Open Word Detail Modal
+    function openWordModal(word, categoryName, type) {
+      const list = type === 'emotion' ? state.emotions : state.needs;
+      const catObj = list.find(c => c.category === categoryName) || list[0];
+      const item = getWordDetails(word, catObj, type);
+      state.selectedWordItem = item;
+
+      // Category badge: Underbar style in its color
+      modalCategoryBadge.style.borderBottomColor = item.color;
+      modalCategoryBadge.textContent = item.category;
+
+      modalTypeBadge.textContent = type === 'emotion' ? 'emotion' : 'need';
+      modalWordTitle.textContent = item.word;
+      modalCategoryDesc.textContent = item.catDesc;
+      modalDefinitionText.textContent = item.definition;
+      modalContextText.textContent = item.context;
+
+      modalRelatedTitle.textContent = type === 'emotion' ? '연결된 욕구' : '연결된 감정';
+      modalRelatedTags.innerHTML = item.related.map(r => `
+        <span class="px-2.5 py-1 bg-zinc-100 text-zinc-800 text-xs font-medium" style="border-radius: 0;">${r}</span>
+      `).join('');
+
+      modalEmpathySentence.textContent = item.empathy;
+
+      // Bookmark
+      const isBookmarked = state.bookmarks.some(b => b.word === item.word);
+      if (isBookmarked) {
+        modalBookmarkIcon.classList.add('fill-amber-400', 'text-amber-500');
+      } else {
+        modalBookmarkIcon.classList.remove('fill-amber-400', 'text-amber-500');
+      }
+
+      // Note
+      modalNoteInput.value = state.userNotes[item.word] || '';
+      memoSavedIndicator.classList.add('hidden');
+
+      wordDetailModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      wordDetailModal.classList.add('hidden');
+      document.body.style.overflow = '';
+      state.selectedWordItem = null;
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', closeModal);
+
+    // Save Note
+    modalSaveNoteBtn.addEventListener('click', () => {
+      if (!state.selectedWordItem) return;
+      const text = modalNoteInput.value.trim();
+      state.userNotes[state.selectedWordItem.word] = text;
+      try {
+        localStorage.setItem('user_notes_v6', JSON.stringify(state.userNotes));
+      } catch (e) {}
+      memoSavedIndicator.classList.remove('hidden');
+      showToast('메모가 저장되었습니다.');
+      setTimeout(() => memoSavedIndicator.classList.add('hidden'), 2000);
+    });
+
+    // Bookmark Toggle
+    modalBookmarkToggleBtn.addEventListener('click', () => {
+      if (!state.selectedWordItem) return;
+      const item = state.selectedWordItem;
+      const idx = state.bookmarks.findIndex(b => b.word === item.word);
+
+      if (idx > -1) {
+        state.bookmarks.splice(idx, 1);
+        modalBookmarkIcon.classList.remove('fill-amber-400', 'text-amber-500');
+        showToast(`'${item.word}' 보관이 해제되었습니다.`);
+      } else {
+        state.bookmarks.push({
+          word: item.word,
+          category: item.category,
+          type: item.type,
+          color: item.color
+        });
+        modalBookmarkIcon.classList.add('fill-amber-400', 'text-amber-500');
+        showToast(`'${item.word}' 단어가 보관함에 담겼습니다.`);
+      }
+
+      try {
+        localStorage.setItem('user_bookmarks_v6', JSON.stringify(state.bookmarks));
+      } catch (e) {}
+      updateBookmarkBadge();
+      if (state.currentSection === 'bookmarks') renderBookmarksView();
+    });
+
+    // Global Word Click Delegation
+    document.addEventListener('click', (e) => {
+      const chip = e.target.closest('.word-block-chip, .word-block-chip-sm');
+      if (chip && chip.dataset.word) {
+        const word = chip.dataset.word;
+        const type = chip.dataset.type || (state.currentSection === 'emotions' ? 'emotion' : 'need');
+        const catIdx = parseInt(chip.dataset.catIdx, 10);
+        const list = type === 'emotion' ? state.emotions : state.needs;
+        const categoryName = list[catIdx] ? list[catIdx].category : list[0].category;
+        openWordModal(word, categoryName, type);
+      }
+
+      // Jump from 모아보기 category title to 펼쳐보기
+      const jumpBtn = e.target.closest('.view-feed-jump-btn');
+      if (jumpBtn && jumpBtn.dataset.catId) {
+        const catId = jumpBtn.dataset.catId;
+        switchView('single');
+        setTimeout(() => {
+          const el = document.getElementById(`cat-feed-${catId}`);
+          if (el) {
+            const yOffset = -65;
+            const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        }, 50);
+      }
+    });
+
+    // Switch View ([펼쳐보기] left, [모아보기] right)
+    function switchView(view) {
+      state.currentView = view;
+      if (view === 'single') {
+        viewSingleBtn.className = 'px-3 py-1 bg-zinc-900 text-white font-medium transition-all';
+        viewGridBtn.className = 'px-3 py-1 bg-white text-zinc-600 hover:text-zinc-900 font-medium transition-all';
+        singleContainer.classList.remove('hidden');
+        gridContainer.classList.add('hidden');
+        renderSingleView();
+      } else {
+        viewGridBtn.className = 'px-3 py-1 bg-zinc-900 text-white font-medium transition-all';
+        viewSingleBtn.className = 'px-3 py-1 bg-white text-zinc-600 hover:text-zinc-900 font-medium transition-all';
+        singleContainer.classList.add('hidden');
+        gridContainer.classList.remove('hidden');
+        renderGridView();
+      }
+    }
+
+    viewSingleBtn.addEventListener('click', () => switchView('single'));
+    viewGridBtn.addEventListener('click', () => switchView('grid'));
+
+    // Switch Main Section
+    function switchSection(sec) {
+      state.currentSection = sec;
+
+      [navEmotionsBtn, navNeedsBtn, navAiBtn, navBookmarkBtn].forEach(b => {
+        b.className = 'px-3 py-1.5 text-xs font-medium bg-white text-zinc-700 hover:text-zinc-900 flex items-center gap-1.5 transition-all';
+      });
+
+      if (sec === 'emotions') {
+        navEmotionsBtn.className = 'px-3 py-1.5 text-xs font-bold bg-zinc-900 text-white flex items-center gap-1.5 transition-all';
+        singleContainer.classList.toggle('hidden', state.currentView !== 'single');
+        gridContainer.classList.toggle('hidden', state.currentView !== 'grid');
+        aiContainer.classList.add('hidden');
+        bookmarkContainer.classList.add('hidden');
+        renderApp();
+      } else if (sec === 'needs') {
+        navNeedsBtn.className = 'px-3 py-1.5 text-xs font-bold bg-zinc-900 text-white flex items-center gap-1.5 transition-all';
+        singleContainer.classList.toggle('hidden', state.currentView !== 'single');
+        gridContainer.classList.toggle('hidden', state.currentView !== 'grid');
+        aiContainer.classList.add('hidden');
+        bookmarkContainer.classList.add('hidden');
+        renderApp();
+      } else if (sec === 'ai') {
+        navAiBtn.className = 'px-3 py-1.5 text-xs font-bold bg-zinc-900 text-white flex items-center gap-1.5 transition-all';
+        singleContainer.classList.add('hidden');
+        gridContainer.classList.add('hidden');
+        aiContainer.classList.remove('hidden');
+        bookmarkContainer.classList.add('hidden');
+      } else if (sec === 'bookmarks') {
+        navBookmarkBtn.className = 'px-3 py-1.5 text-xs font-bold bg-zinc-900 text-white flex items-center gap-1.5 transition-all';
+        singleContainer.classList.add('hidden');
+        gridContainer.classList.add('hidden');
+        aiContainer.classList.add('hidden');
+        bookmarkContainer.classList.remove('hidden');
+        renderBookmarksView();
+      }
+    }
+
+    navEmotionsBtn.addEventListener('click', () => switchSection('emotions'));
+    navNeedsBtn.addEventListener('click', () => switchSection('needs'));
+    navAiBtn.addEventListener('click', () => switchSection('ai'));
+    navBookmarkBtn.addEventListener('click', () => switchSection('bookmarks'));
+
+    // Search
+    searchInput.addEventListener('input', (e) => {
+      state.searchKeyword = e.target.value;
+      if (state.searchKeyword.trim()) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+      renderApp();
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      state.searchKeyword = '';
+      clearSearchBtn.classList.add('hidden');
+      renderApp();
+    });
+
+    resetSearchFilterBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      state.searchKeyword = '';
+      clearSearchBtn.classList.add('hidden');
+      renderApp();
+    });
+
+    clearAllBookmarksBtn.addEventListener('click', () => {
+      state.bookmarks = [];
+      try {
+        localStorage.removeItem('user_bookmarks_v6');
+      } catch (e) {}
+      updateBookmarkBadge();
+      renderBookmarksView();
+      showToast('보관함이 비워졌습니다.');
+    });
+
+    // AI Analysis Engine
+    function analyzeStory(text) {
+      const cleaned = text.toLowerCase();
+      const patterns = [
+        {
+          keys: ['무시', '말을 끊', '발표', '기획안', '부족', '서운', '화', '답답', '얼굴이 화끈'],
+          emotions: ['속상하다', '분통이 터지다', '억울하다', '답답하다', '화끈거리다', '위축되다'],
+          needs: ['존중', '인정', '이해', '기여', '경청', '배려'],
+          summary: '열심히 준비한 정성과 노력이 충분히 존중받지 못해 마음의 상처와 억울함이 일어났습니다. 내 가치와 기여가 타인에게 투명하게 인정받고 싶은 간절한 욕구가 자리 잡고 있습니다.',
+          iMessage: '“회의 중 제 말이 온전히 전달되지 못했을 때, 제 노력에 대한 존중과 인정이 절실하여 큰 속상함과 답답함을 느꼈습니다. 다음에는 제 발표를 끝까지 경청해주시길 부탁드려요.”'
+        },
+        {
+          keys: ['친구', '단답', '바쁘', '실수', '불안', '쓸쓸', '허전', '거리', '외롭'],
+          emotions: ['쓸쓸하다', '외롭다', '허전하다', '불안하다', '서운하다', '조바심이 나다'],
+          needs: ['친밀한 관계', '연결', '유대', '정서적 안전', '소통', '확신'],
+          summary: '친밀했던 관계에 온기가 줄어들면서 소외감과 관계 단절에 대한 두려움이 찾아왔습니다. 무엇보다 따뜻한 연결과 정서적 유대를 확인하고 싶은 소망이 큽니다.',
+          iMessage: '“최근 연락이 뜸해지고 대화가 줄어들었을 때, 너와의 친밀함과 유대가 소중하여 외롭고 불안한 마음이 들었어. 편하게 차 한잔하며 대화 나누고 싶어.”'
+        },
+        {
+          keys: ['면접', '시험', '내일', '심장', '쿵쾅', '땀', '두렵', '잠', '초조', '긴장', '안절부절'],
+          emotions: ['긴장하다', '초조하다', '두렵다', '안절부절못하다', '압박감이 들다', '조바심이 나다'],
+          needs: ['안전', '효능감', '숙달', '자기신뢰', '예측가능성', '휴식'],
+          summary: '자신의 역량을 평가받는 중요한 자리에서 불확실성에 대한 긴장과 두려움이 신체 반응으로 발현되고 있습니다. 그만큼 잘 해내고 싶은 성취와 자기신뢰의 욕구가 높습니다.',
+          iMessage: '“중요한 평가를 앞두고 가슴이 떨리는 것은, 내가 그만큼 이 일에 진심이고 능력을 온전히 발휘하고 싶기 때문이야. 숨을 고르고 나를 믿어줄게.”'
+        },
+        {
+          keys: ['프로젝트', '성공', '칭찬', '기쁘', '뿌듯', '든든', '노력', '고생', '빛'],
+          emotions: ['뿌듯하다', '가슴 벅차다', '신나다', '날아갈 듯 하다', '든든하다', '자랑스럽다'],
+          needs: ['성취', '보람', '기여', '능력', '인생예찬(축하)', '자기구현'],
+          summary: '긴 헌신 끝에 마주한 결실로 인해 자존감과 효능감이 한껏 고양되었습니다. 내 존재가 의미 있게 쓰이고 성장을 실감하고자 하는 삶의 의미 욕구가 아름답게 충족되었습니다.',
+          iMessage: '“지난 시간 흘린 땀방울이 온전한 결실로 이어져 가슴 벅찬 보람과 기쁨을 느껴. 내 노력과 동료들에게 깊은 감사를 전하고 싶어.”'
+        }
+      ];
+
+      let bestMatch = patterns[0];
+      let maxScore = -1;
+      patterns.forEach(p => {
+        let score = 0;
+        p.keys.forEach(k => { if (cleaned.includes(k)) score += 2; });
+        if (score > maxScore) { maxScore = score; bestMatch = p; }
+      });
+
+      if (maxScore <= 0) {
+        const matchedEmos = [];
+        state.emotions.forEach(c => {
+          c.words.forEach(w => {
+            if (cleaned.includes(w.replace(/다$/, '')) || cleaned.includes(w)) matchedEmos.push(w);
+          });
+        });
+        const matchedNds = [];
+        state.needs.forEach(c => {
+          c.words.forEach(w => {
+            if (cleaned.includes(w)) matchedNds.push(w);
+          });
+        });
+
+        bestMatch = {
+          emotions: matchedEmos.length > 0 ? matchedEmos.slice(0, 5) : ['답답하다', '마음이 상하다', '공허하다', '걱정스럽다'],
+          needs: matchedNds.length > 0 ? matchedNds.slice(0, 5) : ['존중', '휴식', '명료함', '정서적 안전'],
+          summary: '작성해주신 상황에서 복합적인 심리적 긴장과 고민이 느껴집니다. 모호했던 감정을 하나씩 짚어보는 것만으로도 마음의 무게가 가벼워질 수 있습니다.',
+          iMessage: '“이 상황에서 나는 나의 소중한 안전과 평화, 존중이 필요해서 마음의 울림을 느끼고 있습니다. 내 감정을 온전히 품어주겠습니다.”'
+        };
+      }
+
+      return bestMatch;
+    }
+
+    aiAnalyzeBtn.addEventListener('click', () => {
+      const text = aiStoryInput.value.trim();
+      if (!text) {
+        showToast('상황이나 감정을 입력해주세요.');
+        aiStoryInput.focus();
+        return;
+      }
+
+      aiAnalyzeBtn.disabled = true;
+      aiSpinIcon.classList.remove('hidden');
+
+      setTimeout(() => {
+        aiAnalyzeBtn.disabled = false;
+        aiSpinIcon.classList.add('hidden');
+
+        const result = analyzeStory(text);
+        aiEmptyPlaceholder.classList.add('hidden');
+        aiResultCard.classList.remove('hidden');
+
+        const now = new Date();
+        aiAnalysisTimestamp.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        aiEmpathySummary.textContent = result.summary;
+        aiNvcSentence.textContent = result.iMessage;
+
+        aiEmotionChips.innerHTML = '';
+        result.emotions.forEach(emo => {
+          const chip = document.createElement('button');
+          chip.className = 'word-block-chip bg-zinc-800 text-white';
+          chip.setAttribute('data-word', emo);
+          chip.setAttribute('data-type', 'emotion');
+          chip.innerHTML = `<span>${emo}</span><span class="tuffy text-[10px] opacity-60 ml-1">→</span>`;
+          aiEmotionChips.appendChild(chip);
+        });
+
+        aiNeedChips.innerHTML = '';
+        result.needs.forEach(nd => {
+          const chip = document.createElement('button');
+          chip.className = 'word-block-chip bg-zinc-800 text-white';
+          chip.setAttribute('data-word', nd);
+          chip.setAttribute('data-type', 'need');
+          chip.innerHTML = `<span>${nd}</span><span class="tuffy text-[10px] opacity-60 ml-1">→</span>`;
+          aiNeedChips.appendChild(chip);
+        });
+
+        showToast('분석 리포트가 생성되었습니다.');
+      }, 400);
+    });
+
+    aiClearInputBtn.addEventListener('click', () => {
+      aiStoryInput.value = '';
+      aiEmptyPlaceholder.classList.remove('hidden');
+      aiResultCard.classList.add('hidden');
+    });
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        aiStoryInput.value = btn.dataset.text;
+        aiAnalyzeBtn.click();
+      });
+    });
+
+    function renderApp() {
+      if (state.currentSection === 'emotions' || state.currentSection === 'needs') {
+        if (state.currentView === 'single') {
+          renderSingleView();
+        } else {
+          renderGridView();
+        }
+      } else if (state.currentSection === 'bookmarks') {
+        renderBookmarksView();
+      }
+    }
+
+    updateBookmarkBadge();
+    renderApp();
+  </script>
+</body>
+</html>
